@@ -107,10 +107,14 @@ gold, Georgia); body text, logo and overall church identity follow the CCC
 brand guide (Avenir-style sans serif, white logo). Fonts fall back to
 Gelasio and Nunito Sans from Google Fonts on phones without Georgia/Avenir.
 
-## Publishing (not yet set up)
+## Publishing
 
-GitHub Pages: create the repository, push this folder, then in
-**Settings → Pages** set **Source** to "Deploy from a branch", branch `main`,
-folder `/docs`. If a custom domain is used, put it in `site.json` under
-`domain` (and the full address under `url`), rebuild, and add the DNS
-record at the domain registrar.
+Live at **https://www.drewbuell.com/sermon-notes/** (GitHub repository
+`buelldrew-afk/sermon-notes`; Pages publishes the `docs/` folder of `main`).
+The address is on drewbuell.com because that account's GitHub site uses that
+domain. Each sermon is at `/sermon-notes/<date>/`; the home page always
+features the newest. To publish a new week: build, then commit and push.
+
+A different custom domain (e.g. a church domain) can be added later: put it in
+`site.json` (`domain` and `url`), rebuild, push, and add a DNS CNAME record
+pointing to `buelldrew-afk.github.io`.
