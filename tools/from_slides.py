@@ -152,7 +152,7 @@ def main():
     counts = [len(outline_points(s["text"])) for s in slides]
     all_points = max((outline_points(s["text"]) for s in slides), key=len, default=[])
     blocks = {i: [] for i in range(len(all_points) + 1)}
-    current, seen_titles, photo_n, used_media = 0, set(), 0, {}
+    current, seen_titles, photo_n, used_media, pending = 0, set(), 0, {}, []
     outline_idx = [i for i, c in enumerate(counts) if c]
     for i, s in enumerate(slides):
         text = s["text"]
@@ -165,11 +165,24 @@ def main():
             if not is_overview:
                 current = counts[i]
             continue
-        if text and re.match(r"^[-–—]\s*\S", text[-1]) and len(text) >= 2:
-            who = re.sub(r"^[-–—]\s*", "", text[-1])
-            body = " ".join(t for t in text[:-1] if "·" not in t)
-            body = re.sub(r"^BELIEVE\s*·.*?JOHN\s*", "", body)
-            blocks[current].append(f"> {body}\n> — {who}")
+        # Quote slides start with a decorative “ mark in its own text box; a quote
+        # that runs over several slides has the citation only on the last one.
+        quote_paras = [t for t in text if t not in ("“", "”", '"') and "·" not in t]
+        is_quote_slide = bool(text) and text[0] in ("“", '"') and quote_paras
+        if is_quote_slide or (text and re.match(r"^[-–—]\s*\S", text[-1]) and len(text) >= 2):
+            who = None
+            if re.match(r"^[-–—]\s*\S", quote_paras[-1]):
+                who = re.sub(r"^[-–—]\s*", "", quote_paras[-1])
+                quote_paras = quote_paras[:-1]
+            pending.extend(quote_paras)
+            if who is None:
+                continue  # quote continues on the next slide
+            lines_q = []
+            for n, para in enumerate(pending):
+                lines_q += ([">"] if n else []) + [f"> {para}"]
+            lines_q.append(f"> — {who}")
+            blocks[current].append(chr(10).join(lines_q))
+            pending = []
             continue
         if s["pics"] and not text:
             for media, crop in s["pics"]:
